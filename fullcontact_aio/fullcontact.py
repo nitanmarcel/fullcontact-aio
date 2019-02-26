@@ -35,54 +35,9 @@ class FullContact(object):
         self.post_endpoints = {
             'batch': 'batch.json'
         }
-
-    async def person(self, **kwargs):
-        result = await self.api_get("person", **kwargs)
-        return result
-
-    async def company(self, **kwargs):
-        result = await self.api_get("company")
-        return result
-
-    async def company_search(self, **kwargs):
-        result = await self.api_get("company_search", **kwargs)
-        return result
-
-    async def disposable(self, **kwargs):
-        result = await self.api_get("disposable", **kwargs)
-        return result
-
-    async def name_normalizer(self, **kwargs):
-        result = await self.api_get("name_normalizer", **kwargs)
-        return result
-
-    async def name_deducer(self, **kwargs):
-        result = await self.api_get("name_deducer", **kwargs)
-        return result
-
-    async def name_similarity(self, **kwargs):
-        result = await self.api_get("name_similarity", **kwargs)
-        return result
-
-    async def name_stats(self, **kwargs):
-        result = await self.api_get("name_stats", **kwargs)
-        return result
-
-    async def name_parser(self, **kwargs):
-        result = await self.api_get("name_parser", **kwargs)
-        return result
-
-    async def address_locationNormalizer(self, **kwargs):
-        result = await self.api_get("address_locationNormalizer", **kwargs)
-        return result
-
-    async def address_locationEnrichment(self, **kwargs):
-        result = await self.api_get("address_locationEnrichment", **kwargs)
-        return result
-
-    async def account_stats(self, **kwargs):
-        result = await self.api_get("account_stats", **kwargs)
-        return result
+        for endpoint in self.get_endpoints:
+            method = lambda endpoint=endpoint, **kwargs: self.api_get(endpoint, **kwargs)
+            setattr(self, endpoint, method)
 
     async def api_get(self, endpoint, **kwargs):
         """ Makes a FullContact API call
