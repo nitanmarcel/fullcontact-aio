@@ -1,13 +1,17 @@
 import json
 import logging
-import requests
+import aiohttp
 import sys
-if sys.version_info[0] < 3:
-    import urllib
-else:
-    import urllib.parse as urllib
+import urllib.parse as urllib
+
 
 log = logging.getLogger(__name__)
+
+class FullContactRespoonse(object):
+    def __init__(self, status_code, rate_limit_remaining, json_response):
+        self.status_code = status_code
+        self.rate_limit_remaining = rate_limit_remaining
+        self.json_response = json_response
 
 
 class FullContact(object):
@@ -32,11 +36,55 @@ class FullContact(object):
             'batch': 'batch.json'
         }
 
-        for endpoint in self.get_endpoints:
-            method = lambda endpoint=endpoint, **kwargs: self.api_get(endpoint, **kwargs)
-            setattr(self, endpoint, method)
+    async def person(self, **kwargs):
+        result = await self.api_get("person", **kwargs)
+        return result
 
-    def api_get(self, endpoint, **kwargs):
+    async def company(self, **kwargs):
+        result = await self.api_get("company")
+        return result
+
+    async def company_search(self, **kwargs):
+        result = await self.api_get("company_search", **kwargs)
+        return result
+
+    async def disposable(self, **kwargs):
+        result = await self.api_get("disposable", **kwargs)
+        return result
+
+    async def name_normalizer(self, **kwargs):
+        result = await self.api_get("name_normalizer", **kwargs)
+        return result
+
+    async def name_deducer(self, **kwargs):
+        result = await self.api_get("name_deducer", **kwargs)
+        return result
+
+    async def name_similarity(self, **kwargs):
+        result = await self.api_get("name_similarity", **kwargs)
+        return result
+
+    async def name_stats(self, **kwargs):
+        result = await self.api_get("name_stats", **kwargs)
+        return result
+
+    async def name_parser(self, **kwargs):
+        result = await self.api_get("name_parser", **kwargs)
+        return result
+
+    async def address_locationNormalizer(self, **kwargs):
+        result = await self.api_get("address_locationNormalizer", **kwargs)
+        return result
+
+    async def address_locationEnrichment(self, **kwargs):
+        result = await self.api_get("address_locationEnrichment", **kwargs)
+        return result
+
+    async def account_stats(self, **kwargs):
+        result = await self.api_get("account_stats", **kwargs)
+        return result
+
+    async def api_get(self, endpoint, **kwargs):
         """ Makes a FullContact API call
 
         Formats and submits a request to the specified endpoint, appending
@@ -61,7 +109,15 @@ class FullContact(object):
 
         headers = {'X-FullContact-APIKey': self.api_key}
         endpoint = self.base_url + self.get_endpoints[endpoint]
-        return requests.get(endpoint, params=kwargs, headers=headers)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(endpoint, params=kwargs, headers=headers) as request:
+                try:
+                    rate_limit_remaining = request.headers["x-rate-limit-remaining"]
+                except KeyError:
+                    rate_limit_remaining = "Failed to get the remaining rate"
+                status_code = request.status
+                to_json = await request.json()
+                return FullContactRespoonse(status_code, rate_limit_remaining, to_json)
 
     def _prepare_batch_url(self, b):
         """ Format a url to submit to the batch API
@@ -83,36 +139,7 @@ class FullContact(object):
 
         return batch_url
 
-    def api_batch(self, batch_calls):
-        """ Submit a batch request to the fullcontact API
-
-        You may POST up to 20 requests per call the batch endpoint,
-        although this limit is not enforced by the function. Responding
-        to invalid requests will be handled by the API and should be
-        coded against outside this module.
-
-        Args:
-            batch_calls: a list of tuples of (str, dict) identifying
-                endpoint to make a GET request to as well as the
-                parameters to append to that request.
-
-        Returns:
-            A Requests object containing the results of all batched
-            requests contained in the batch_calls list.
-
-        Resources:
-            https://www.fullcontact.com/developer/docs/batch/
-
-        """
-        payload = [self._prepare_batch_url(b) for b in batch_calls]
-        headers = {'content-type': 'application/json',
-                   'X-FullContact-APIKey': self.api_key}
-        data = json.dumps({'requests': payload})
-        endpoint = self.base_url + self.post_endpoints['batch']
-
-        return requests.post(endpoint, data=data, headers=headers)
-
-    def query_emails(self, *emails):
+    async def query_emails(self, *emails):
         """
         Accept one or many email addresses, and place a single or batch query
         for all to fetch contact information. Returns a list of results.
@@ -122,12 +149,13 @@ class FullContact(object):
             raise ValueError("Must provide at least one email to use.")
         elif len(emails) == 1:
             # Single API call
-            r = self.api_get('person', email=emails[0]).json()
-            o = {emails[0]: r}
+            r = await self.api_get('person', email=emails[0])
+
+            o = {emails[0]: await r}
         else:
             # Batch API call
-            r = self.api_batch([('person', {'email': e}) for e in emails])
-            responses = r.json()['responses']
+            r = await self.api_batch([('person', {'email': e}) for e in emails])
+            responses = await r.json()['responses']
             o = {}
             for e in emails:
                 req = self._prepare_batch_url(('person', {'email': e}))
@@ -135,4 +163,4 @@ class FullContact(object):
                     o[e] = responses[req]
         # API returns 404 for absent data.. restful, but may break batch?
         # r.raise_for_status()
-        return o
+        return

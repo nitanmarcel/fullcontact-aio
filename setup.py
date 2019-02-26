@@ -9,33 +9,28 @@ from setuptools import setup
 
 
 setup(
-    name='FullContact.py',
+    name='FullContact-AIO',
     version='0.0.6',
-    url='https://github.com/fullcontact/fullcontact.py',
+    url='https://github.com/nitanmarcel/fullcontact-aio',
     license='MIT',
-    author=['FullContact'],
-    author_email=['support@fullcontact.com'],
-    description='Simple Python interface for FullContact, using Requests',
-    long_description='Simple Python interface for FullContact, using Requests',
-    packages=['fullcontact'],
+    author='nitanmarcel',
+    author_email='nitan.marcel@gmail.com',
+    description='Simple Python interface for FullContact, using aiohttp',
+    long_description='Simple Python interface for FullContact, using aiohttp',
+    packages=['fullcontact_aio'],
     zip_safe=False,
     platforms='any',
     install_requires=[
-        'requests',
+        'aiohttp',
     ],
     include_package_data=True,
-    tests_require=[
-        'nose>=1.0',
-        'flake8<=2.6.2'  # Last version of flake8 to support Python 2.6
-    ],
-    test_suite='nose.collector',
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ]

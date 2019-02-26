@@ -10,7 +10,7 @@ Installation
 ------------
 
 ```
-pip install fullcontact.py
+pip install FullContact-AIO
 ```
 
 Usage
@@ -18,43 +18,22 @@ Usage
 
 
 ```python
->>> from fullcontact import FullContact
->>> fc = FullContact('your_api_key')
 
-# returns a real requests object
->>> r = fc.person(email='you@email.com')
->>> r.status_code
-200
->>> r.headers['x-rate-limit-remaining']
-'59'
->>> r.json()
-{u'socialProfiles': [...], u'demographics': {...}, ... }
+from fullcontact import FullContact
+import asyncio
+async def get_person():
+    fc = FullContact('your_api_key')
 
-# for batched calls - a list of tuples like (endpoint, {params})
->>> batch_calls = [
-        ('disposable', {'email': 'this-is-a-fake-email@fake.com'}),
-        ('person', {'email': 'email@gmail.com'}),
-        ...
-    ]
->>> r2 = fc.api_batch(batch_calls)
+    #return a FullContactRespoonse object
+    r = await fc.person(email='you@email.com')
+    print(r.status_code) # 200
+    print(r.rate_limit_remaining) # 59
+    print(r.json_response) # {u'socialProfiles': [...], u'demographics': {...}, ... }
 ```
 
-Tests
------
-
-A limited test suite is available. Run with `nosetests` after installing, or if
-you're installing directly via `setup.py` you can use Nose's setuptools
-extension like so:
-
-```
-python setup.py install nosetests
-```
+asyncio.get_event_loop().run_until_complete(get_person())
 
 Supported Python Versions
 -------------------------
-* 2.6
-* 2.7
-* 3.3
-* 3.4
-* 3.5
 * 3.6
+* 3.7
