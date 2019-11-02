@@ -29,9 +29,9 @@ async def get_person():
     print(r.status_code) # 200
     print(r.rate_limit_remaining) # 59
     print(r.json_response) # {u'socialProfiles': [...], u'demographics': {...}, ... }
+asyncio.get_event_loop().run_until_complete(get_person())
 ```
 
-asyncio.get_event_loop().run_until_complete(get_person())
 
 Supported Python Versions
 -------------------------
