@@ -10,10 +10,10 @@ from setuptools import setup
 
 setup(
     name='FullContact-AIO',
-    version='0.0.7',
+    version='0.0.8',
     url='https://github.com/nitanmarcel/fullcontact-aio',
     license='MIT',
-    author='nitanmarcel',
+    author='Marcel Alexandru Nitan',
     author_email='nitan.marcel@gmail.com',
     description='Simple Python interface for FullContact, using aiohttp',
     long_description='Simple Python interface for FullContact, using aiohttp',
